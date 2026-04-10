@@ -1,30 +1,52 @@
 
 function drawIt() {
-var x = 150;
-var y = 150;
+var x = 400;
+var y = 700;
 var dx = 2;
 var dy = 4;
 var intervalId;
 var WIDTH;
 var HEIGHT;
 var f = 0;
-var r=10;
+var r=20;
 var ctx;
 var rightDown = false;
 var leftDown = false;
 
+//deklaracija in inicializacija slike
+var ship = new Image();
+ship.src = "img/pirateShip.png";
+var paddle =  new Image();
+paddle.src = "img/paddle.png";
+var ball = new Image();
+ball.src = "img/ball.png"
+var goldenShip = new Image();
+goldenShip.src = "img/crow.webp";
+
+var ships = [
+  goldenShip,
+  ship
+];
+  
+
+
+//vstavljanje slike
+
+
+
+
 
 //nastavljanje leve in desne tipke
 function onKeyDown(evt) {
-  if (evt.keyCode == 39)
+  if (evt.keyCode == 39 || evt.key=== "d")
 rightDown = true;
-  else if (evt.keyCode == 37) leftDown = true;
+  else if (evt.keyCode == 37 || evt.key=== "a") leftDown = true;
 }
 
 function onKeyUp(evt) {
-  if (evt.keyCode == 39)
+  if (evt.keyCode == 39 || evt.key=== "d")
 rightDown = false;
-  else if (evt.keyCode == 37) leftDown = false;
+  else if (evt.keyCode == 37 || evt.key=== "as") leftDown = false;
 }
 $(document).keydown(onKeyDown);
 $(document).keyup(onKeyUp); 
@@ -39,7 +61,7 @@ function init() {
 
 function circle(x,y,r) {
   ctx.beginPath();
-  ctx.arc(x, y, r, 0, Math.PI*2, true);
+  ctx.drawImage(ball, x - r, y - r, r * 2, r * 2); 
   ctx.closePath();
   ctx.fill();
 }
@@ -66,13 +88,13 @@ var paddlew;
 
 function init_paddle() {
   paddlex = WIDTH / 2;
-  paddleh = 10;
-  paddlew = 75;
+  paddleh = 45;
+  paddlew = 150;
 }
 
 function draw() {
   clear();
-  circle(x, y, 10);
+  circle(x, y, r);
   //premik ploščice levo in desno
   if(rightDown){
 if((paddlex+paddlew) < WIDTH){
@@ -88,16 +110,15 @@ paddlex -=5;
 paddlex=0;
 }
 }
-rect(paddlex, HEIGHT-paddleh, paddlew, paddleh);
+ctx.drawImage(paddle,paddlex, HEIGHT-paddleh, paddlew, paddleh);
 
 //riši opeke
 for (i=0; i < NROWS; i++) {
-    ctx.fillStyle = rowcolors[i]; //barvanje vrstic
+    
     for (j=0; j < NCOLS; j++) {
-      if (bricks[i][j] == 1) {
-        rect((j * (BRICKWIDTH + PADDING)) + PADDING,
-            (i * (BRICKHEIGHT + PADDING)) + PADDING,
-            BRICKWIDTH, BRICKHEIGHT);
+      if (bricks[i][j] == 0 || bricks[i][j]==1) {
+        
+        ctx.drawImage(ships[bricks[i][j]], (j * (BRICKWIDTH + PADDING)) + PADDING, (i * (BRICKHEIGHT + PADDING)) + PADDING, BRICKWIDTH, BRICKHEIGHT);
       }
     }
   }
@@ -107,8 +128,9 @@ for (i=0; i < NROWS; i++) {
   row = Math.floor(y/rowheight);
   col = Math.floor(x/colwidth);
   //Če smo zadeli opeko, vrni povratno kroglo in označi v tabeli, da opeke ni več
-if (y < NROWS * rowheight && row >= 0 && col >= 0 && bricks[row][col] == 1) {
-dy = -dy; bricks[row][col] = 0;
+if (y < NROWS * rowheight && row >= 0 && col >= 0 && bricks[row][col] !== -1) {
+  dy = -dy;
+  bricks[row][col] = -1;
 }
   if (x + dx > WIDTH -r || x + dx < 0+r)
     dx = -dx;
@@ -134,9 +156,7 @@ var NCOLS;
 var BRICKWIDTH;
 var BRICKHEIGHT;
 var PADDING;
-var rowcolors = ["#FF1C0A", "#FFFD0A", "#00A308", "#0008DB", "#EB0093"];
-var paddlecolor = "#000000";
-var ballcolor = "#333333";
+
 
 
 
@@ -144,13 +164,14 @@ function initbricks() { //inicializacija opek - polnjenje v tabelo
   NROWS = 5;
   NCOLS = 5;
   BRICKWIDTH = (WIDTH/NCOLS) - 1;
-  BRICKHEIGHT = 15;
+  BRICKHEIGHT = 80;
   PADDING = 1;
   bricks = new Array(NROWS);
   for (i=0; i < NROWS; i++) {
     bricks[i] = new Array(NCOLS);
     for (j=0; j < NCOLS; j++) {
-      bricks[i][j] = 1;
+      bricks[i][j] = Math.random() *2 > 0.3?1:0 ;
+
     }
   }
 }
