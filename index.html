@@ -1,19 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title> The brihs </title>
+<title>Scallywag's Revenge</title>
+<link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
 <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
-<body onload="drawIt()">
+<body onload="startScreen()">
+  <div id="doubloon_score">Doubloons: 0</div>
   <h1 id="title">Scallywag's Revenge</h1>
+  <button id="store_toggle" onclick="toggleStore()">Store</button>
+
+  <div id="bilge_rat_store">
+    <h2>Bilge Rat's Store</h2>
+    <p><strong>Welcome</strong>to the Bilge Rat's Store! Spend your hard-earned doubloons on upgrades and items to aid you in your quest for revenge!</p>
+     <div>
+        <ul>
+          <li><strong>Better Cannons</strong> - 15 Doubloons: Increases your attack speed. <button onclick="purchase('cannons', 15)">Buy</button></li>
+          <li><strong>Speed Boots</strong> - 20 Doubloons: Increases your movement speed. <button onclick="purchase('boots', 20)">Buy</button></li>
+        </ul>
+    </div>
+    
+  </div>
   <div id="main">
     <canvas id="canvas" width="1500" height="800"></canvas>
-  </div>
+  </div> 
 </body>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="js/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.js"></script>
+ <script src="js/script.js"></script>
+
 </html>
 
 

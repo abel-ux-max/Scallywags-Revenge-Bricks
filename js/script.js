@@ -14,6 +14,113 @@ document.addEventListener('gesturestart', function (e) {
 var ballActive = false;
 var dx = 0;
 var dy = 0;
+var coins = 0;  // Global coins variable
+var upgrades = {
+  cannons: false,
+  boots: false
+};
+var gameActive = true;
+var gameStartTime = Date.now();
+
+  var welcomePlayed = false;
+
+// Audio Manager
+var AudioManager = {
+  sounds: {
+    explosion: new Audio('sfx/explosion.mp3'),
+    cannonFire: new Audio('sfx/cannon-fire.mp3'),
+    shipHit: new Audio('sfx/ship-hit.mp3'),
+    purchase: new Audio('sfx/purchase.mp3'),
+    victory: new Audio('sfx/victory.mp3'),
+    gameOver: new Audio('sfx/game-over.mp3')
+  },
+  backgroundMusic: [
+    new Audio('sfx/music/bg-1.mp3'),
+    new Audio('sfx/music/bg-2.mp3'),
+    new Audio('sfx/music/bg-3.mp3')
+  ],
+  speechSounds: {
+    youNeed: new Audio('sfx/not_enough.mp3'),
+    moreDoubloons: new Audio('sfx/doubloons.mp3'),
+    welcomeStore: new Audio('sfx/welcome.mp3'),
+    numbers: []
+  },
+  currentMusicIndex: 0,
+  isMusicPlaying: false,
+
+  init: function() {
+    // Initialize number sounds 1-25
+    for (let i = 1; i <= 25; i++) {
+      this.speechSounds.numbers[i] = new Audio('sfx/numbers/' + i + '.mp3');
+    }
+    // Set all sounds to loop if needed
+    this.backgroundMusic.forEach(music => {
+      music.volume = 0.3;
+      music.addEventListener('ended', () => this.playNextMusic());
+    });
+  },
+
+  playSoundEffect: function(soundName) {
+    if (this.sounds[soundName]) {
+      this.sounds[soundName].currentTime = 0;
+      this.sounds[soundName].play().catch(err => console.log('Audio play failed:', err));
+    }
+  },
+
+  playInsufficientFundsSpeech: function(coinsNeeded) {
+    const sounds = [];
+    sounds.push(this.speechSounds.youNeed);
+    if (coinsNeeded <= 25 && coinsNeeded > 0) {
+      sounds.push(this.speechSounds.numbers[coinsNeeded]);
+    }
+    sounds.push(this.speechSounds.moreDoubloons);
+    
+    this.playSequence(sounds);
+  },
+
+  playSequence: function(audioArray) {
+    let index = 0;
+    const playNext = () => {
+      if (index < audioArray.length) {
+        const audio = audioArray[index];
+        audio.currentTime = 0;
+        audio.play().catch(err => console.log('Audio play failed:', err));
+        audio.onended = () => {
+          index++;
+          playNext();
+        };
+      }
+    };
+    playNext();
+  },
+
+  playBackgroundMusic: function() {
+    if (!this.isMusicPlaying) {
+    this.isMusicPlaying = true;
+    this.currentMusicIndex = Math.floor(Math.random() * 3); 
+    this.backgroundMusic[this.currentMusicIndex].play().catch(err => console.log('Music play failed:', err));
+    }
+  },
+
+  playNextMusic: function() {
+    this.currentMusicIndex = Math.floor(Math.random() * this.backgroundMusic.length);
+    this.backgroundMusic[this.currentMusicIndex].currentTime = 0;
+    this.backgroundMusic[this.currentMusicIndex].play().catch(err => console.log('Music play failed:', err));
+  },
+
+  stopBackgroundMusic: function() {
+    this.backgroundMusic.forEach(music => music.pause());
+    this.isMusicPlaying = false;
+  },
+
+  setVolume: function(type, volume) {
+    if (type === 'Music') {
+      this.backgroundMusic.forEach(music => music.volume = volume);
+    } else if (this.sounds[type]) {
+      this.sounds[type].volume = volume;
+    }
+  }
+};
 
 function attack(e) {
   if (e.key === " ") {
@@ -22,13 +129,38 @@ function attack(e) {
       ballActive = true;
       dx = 0;
       dy = -8;
+      AudioManager.playSoundEffect('cannonFire');
     }
   }
 }
 
 document.addEventListener("keydown", attack);
 
+
+function startScreen() {
+  Swal.fire({
+    title: 'Sea of Doubloons',
+    html: 'Destroy the enemy fleet and collect doubloons!<br><br>' +
+          '<strong>A / D</strong> or <strong>ARROWS</strong> to move<br>' +
+          '<strong>Space</strong> to fire',
+    confirmButtonText: 'Set Sail!',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    preConfirm: () => {
+      AudioManager.init();
+      AudioManager.playBackgroundMusic(); // runs directly on button click
+      console.log(AudioManager.speechSounds.welcomeStore.src);
+    }
+  }).then(() => {
+    drawIt();
+  });
+}
+
+
+
+
 function drawIt() {
+  console.log(AudioManager.speechSounds.welcomeStore.src);
   var x = $("#canvas").width() / 2;
   var y = $("#canvas").height() - 100;
   var intervalId;
@@ -61,11 +193,21 @@ function drawIt() {
   ball.src = "img/ball.png"
   var goldenShip = new Image();
   goldenShip.src = "img/goldenShip.png";
+  var goldenShipDamaged1 = new Image();
+  goldenShipDamaged1.src = "img/goldenShipD1.png";
+  var goldenShipDamaged2 = new Image();
+  goldenShipDamaged2.src = "img/goldenShipD2.png";
 
 
   var ships = [
     goldenShip,
     ship
+  ];
+  
+  var goldenShipVariants = [
+    goldenShip,
+    goldenShipDamaged1,
+    goldenShipDamaged2
   ];
 
   var idleFrames = [1, 2, 3].map(i => {
@@ -74,15 +216,15 @@ function drawIt() {
     return img;
   }).concat([player, player, player]);
 
-  var moveFrames = [1, 2].map(i => {
+  var moveFrames = [1, 2, 3].map(i => {
     var img = new Image();
     img.src = "img/player/moving" + i + ".png";
     return img;
-  }).concat([player, player, player]);
+  });
 
   var frameIndex = 0;
   var frameTick = 0;
-  var FRAME_SPEED = 10;
+  var FRAME_SPEED = 13;
 
 
 
@@ -155,8 +297,9 @@ function drawIt() {
 
     // Keep ball with paddle when not active, with bobbing animation
     if (!ballActive) {
-      x = paddlex + paddlew / 2;
-      y = HEIGHT - paddleh + paddlePadY - 5 + bobOffset;
+      var cannonOffsetX = wasLeftDown ? 2 : -2;  // Adjust offset based on direction
+      x = paddlex + paddlew / 2 + cannonOffsetX;
+      y = HEIGHT - paddleh + paddlePadY - 20 + bobOffset;
     }
 
     circle(x, y, r);
@@ -217,12 +360,23 @@ function drawIt() {
           var by = (i * (BRICKHEIGHT + PADDING)) + PADDING + Math.sin(Date.now() / 400 + bobOffsets[i][j]) * 1;  // Random bob animation
 
           ctx.save();
+          var shipImage;
+          if (bricks[i][j] === 0) {
+            // Golden ship - select sprite based on HP
+            var hpIndex = Math.max(0, 3 - shipHP[i][j]);  // 4HP=0, 3HP=1, 2HP=2, 1HP=3(but max is 2)
+            hpIndex = Math.min(hpIndex, 2);
+            shipImage = goldenShipVariants[hpIndex];
+          } else {
+            // Regular ship
+            shipImage = ships[bricks[i][j]];
+          }
+          
           if (flips[i][j]) {
             ctx.translate(bx + BRICKWIDTH, by);
             ctx.scale(-1, 1);
-            ctx.drawImage(ships[bricks[i][j]], 0, 0, BRICKWIDTH, BRICKHEIGHT);
+            ctx.drawImage(shipImage, 0, 0, BRICKWIDTH, BRICKHEIGHT);
           } else {
-            ctx.drawImage(ships[bricks[i][j]], bx, by, BRICKWIDTH, BRICKHEIGHT);
+            ctx.drawImage(shipImage, bx, by, BRICKWIDTH, BRICKHEIGHT);
           }
           ctx.restore();
         }
@@ -265,14 +419,30 @@ function drawIt() {
     if (y < NROWS * rowheight && row >= 0 && col >= 0 && bricks[row][col] !== -1) {
       y = HEIGHT - paddleHeight;
       x = paddlex + (paddleWidth / 2);
-      bricks[row][col] = -1;
+      
+      var bx = (col * (BRICKWIDTH + PADDING)) + PADDING + BRICKWIDTH / 2;
+      var by = (row * (BRICKHEIGHT + PADDING)) + PADDING + BRICKHEIGHT / 2;
+      
+      // Handle HP for golden ships
+      if (bricks[row][col] === 0) {
+        shipHP[row][col]--;
+        AudioManager.playSoundEffect('shipHit');
+        if (shipHP[row][col] <= 0) {
+          bricks[row][col] = -1;
+          coins += 5;  // Golden ships give 5 coins
+          AudioManager.playSoundEffect('explosion');
+          createExplosion(bx, by, 200);
+        }
+      } else {
+        bricks[row][col] = -1;
+        coins += 1;  // Regular ships give 1 coin
+        AudioManager.playSoundEffect('explosion');
+        createExplosion(bx, by, 200);
+      }
+      
       dx = 0;
       dy = 0;
       ballActive = false;
-
-      var bx = (col * (BRICKWIDTH + PADDING)) + PADDING + BRICKWIDTH / 2;
-      var by = (row * (BRICKHEIGHT + PADDING)) + PADDING + BRICKHEIGHT / 2;
-      createExplosion(bx, by, 200);
     }
     if (x + dx > WIDTH - (r - ballPad) || x + dx < 0 + (r - ballPad))
       dx = -dx;
@@ -283,11 +453,34 @@ function drawIt() {
         dx = 8 * ((x - (paddlex + paddlew / 2)) / paddlew);
         dy = -dy;
       }
-      else if (y + dy > HEIGHT - r)
+      else if (y + dy > HEIGHT - r) {
         clearInterval(intervalId);
+        gameOver();
+      }
     }
     x += dx;
     y += dy;
+
+    // Update coins display
+    $('#doubloon_score').text('Doubloons: ' + coins);
+
+    // Check for win condition (all ships destroyed)
+    if (gameActive) {
+      let allDestroyed = true;
+      for (let i = 0; i < NROWS; i++) {
+        for (let j = 0; j < NCOLS; j++) {
+          if (bricks[i][j] !== -1) {
+            allDestroyed = false;
+            break;
+          }
+        }
+        if (!allDestroyed) break;
+      }
+      if (allDestroyed) {
+        clearInterval(intervalId);
+        winGame();
+      }
+    }
   }
   init_paddle();
 
@@ -295,6 +488,7 @@ function drawIt() {
   var bricks;
   var flips;
   var bobOffsets;
+  var shipHP;  // Track HP for golden ships
   var NROWS;
   var NCOLS;
   var BRICKWIDTH;
@@ -313,14 +507,17 @@ function drawIt() {
     bricks = new Array(NROWS);
     flips = new Array(NROWS);
     bobOffsets = new Array(NROWS);
+    shipHP = new Array(NROWS);
     for (i = 0; i < NROWS; i++) {
       bricks[i] = new Array(NCOLS);
       flips[i] = new Array(NCOLS);
       bobOffsets[i] = new Array(NCOLS);
+      shipHP[i] = new Array(NCOLS);
       for (j = 0; j < NCOLS; j++) {
         bricks[i][j] = Math.random() * 2 > 0.3 ? 1 : 0;
         flips[i][j] = Math.random() > 0.5;
         bobOffsets[i][j] = Math.random() * Math.PI * 2;  // Random phase 0-2π
+        shipHP[i][j] = bricks[i][j] === 0 ? 3 : 1;  // Golden ships (0) have 3 HP, regular ships (1) have 1 HP
       }
     }
   }
@@ -354,4 +551,83 @@ function Particle(x, y, type = 'trail') {
   }
 
   this.life = 1;
+}
+
+// Store functions
+function purchase(item, cost) {
+  if (coins >= cost) {
+    coins -= cost;
+    upgrades[item] = true;
+    $('#doubloon_score').text('Doubloons: ' + coins);
+    AudioManager.playSoundEffect('purchase');
+    Swal.fire({
+      title: 'Purchase Successful!',
+      html: 'You purchased <strong>' + item + '</strong><br>Doubloons left: ' + coins,
+      icon: 'success',
+      confirmButtonText: 'Aye!'
+    });
+    console.log('Purchased:', item);
+  } else {
+    const needed = cost - coins;
+    AudioManager.playInsufficientFundsSpeech(needed);
+    Swal.fire({
+      title: 'Not Enough Doubloons!',
+      html: 'You need <strong>' + needed + '</strong> more doubloon' + (needed > 1 ? 's' : '') + '.',
+      icon: 'error',
+      confirmButtonText: 'Back to Plundering'
+    });
+  }
+}
+
+function toggleStore() {
+  $('#bilge_rat_store').toggleClass('active');
+
+  if ($('#bilge_rat_store').hasClass('active')) {
+    var sound = AudioManager.speechSounds.welcomeStore;
+    sound.currentTime = 0;
+    sound.play().catch(err => console.log('welcome sound error:', err));
+
+    if (welcomePlayed) {
+      // Only play 2 seconds on repeat opens
+      setTimeout(() => {
+        sound.pause();
+        sound.currentTime = 0;
+      }, 2000);
+    }
+
+    welcomePlayed = true;
+  }
+}
+
+function gameOver() {
+  gameActive = false;
+  AudioManager.stopBackgroundMusic();
+  AudioManager.playSoundEffect('gameOver');
+  Swal.fire({
+    title: 'Game Over!',
+    html: 'Ye lost the battle!<br><strong>Doubloons Earned: ' + coins + '</strong>',
+    icon: 'error',
+    confirmButtonText: 'Try Again'
+  }).then(() => {
+    restartGame();
+  });
+}
+
+function winGame() {
+  gameActive = false;
+  AudioManager.stopBackgroundMusic();
+  AudioManager.playSoundEffect('victory');
+  const timeSecs = Math.floor((Date.now() - gameStartTime) / 1000);
+  Swal.fire({
+    title: 'Victory!',
+    html: 'Ye destroyed all the ships!<br><strong>Doubloons: ' + coins + '</strong><br><strong>Time: ' + timeSecs + 's</strong>',
+    icon: 'success',
+    confirmButtonText: 'Play Again'
+  }).then(() => {
+    restartGame();
+  });
+}
+
+function restartGame() {
+  location.reload();
 }
