@@ -60,7 +60,7 @@ function drawIt() {
   var ball = new Image();
   ball.src = "img/ball.png"
   var goldenShip = new Image();
-  goldenShip.src = "img/goldenship.png";
+  goldenShip.src = "img/goldenShip.png";
 
 
   var ships = [
