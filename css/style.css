@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Pixelify+Sans:wght@400..700&family=Source+Sans+3:ital,wght@0,200..900;1,200..900&display=swap');
 *{
     margin: 0;
     padding:0;
@@ -10,11 +11,41 @@ html,body{
     width: 100vw;
     height: 100vh;
     
-     display: flex;
+     
+  background-image: url('../img/background.png');
+  margin: 0;
+  background-repeat: no-repeat;
+  display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
 }
 #canvas{
-    border: 2px solid black;
-    background-image: url("../img/background.webp");
+    background-color:#ffffff00;
+  background-repeat: repeat;
+  background-size: 128px 128px;
 }
+#title{
+    font-family: "Pixelify Sans", sans-serif;
+    font-size: 3em;
+    color: #FFD700;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    text-shadow: 
+        3px 3px 0px rgba(255, 165, 0, 0.6),
+        -3px -3px 0px rgba(255, 165, 0, 0.6),
+        3px -3px 0px rgba(255, 165, 0, 0.6),
+        -3px 3px 0px rgba(255, 165, 0, 0.6),
+        0px 0px 20px rgba(255, 215, 0, 0.8),
+        0px 0px 40px rgba(255, 165, 0, 0.6);
+    font-weight: 700;
+    letter-spacing: 3px;
+    z-index: 10;
+}
+body {
+    
+}
+
