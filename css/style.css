@@ -12,9 +12,9 @@ html,body{
     height: 100vh;
     
      
-  background-image: url('../img/background.png');
+  background-image: url('../img/background2.png');
   margin: 0;
-  background-repeat: repeat;
+  background-repeat: round;
   display: flex;
   justify-content: center;
   align-items: center;
