@@ -128,7 +128,9 @@ function attack(e) {
     if (!ballActive) {
       ballActive = true;
       dx = 0;
-      dy = -8;
+      if(upgrades.cannons){
+        dy=-16;
+      }else dy = -8;
       AudioManager.playSoundEffect('cannonFire');
     }
   }
@@ -308,7 +310,7 @@ function drawIt() {
 
     if (rightDown) {
       if ((paddlex + paddlew) < WIDTH) {
-        paddlex += 5;
+        upgrades.boots ? paddlex+=10:paddlex+=5;
         moving = true;
         wasLeftDown = false;
       } else {
@@ -319,7 +321,7 @@ function drawIt() {
       wasLeftDown = true;
       moving = true;
       if (paddlex > 0) {
-        paddlex -= 5;
+        upgrades.boots ? paddlex-=10:paddlex-=5;
       } else {
         paddlex = 0;
       }
@@ -592,7 +594,7 @@ function toggleStore() {
       setTimeout(() => {
         sound.pause();
         sound.currentTime = 0;
-      }, 2000);
+      }, 2650);
     }
 
     welcomePlayed = true;
