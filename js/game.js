@@ -354,8 +354,8 @@ function drawIt() {
 
 
   function initbricks() { //inicializacija opek - polnjenje v tabelo
-    NROWS = 1;
-    NCOLS = 1;
+    NROWS = 5;
+    NCOLS = 10;
     BRICKWIDTH = (WIDTH / NCOLS) - 1;
     BRICKHEIGHT = 80;
     PADDING = 1;
