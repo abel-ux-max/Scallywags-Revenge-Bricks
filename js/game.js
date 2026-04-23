@@ -34,6 +34,7 @@ function drawIt() {
   var wasMoving = false;
   var paddleHeight = 120;
   var paddleWidth = 120;
+  var speed = 5 + (upgrades.boots * 3);
 
   //nastavitve za razmik med elementi
   var ballPad = 6;
@@ -140,6 +141,10 @@ function drawIt() {
   }
 
   function draw() {
+    if (startLevel2) {
+      startLevel2 = false;
+      initLevel2();
+    }
     clear();
 
     // Calculate bob animation for all sprites
@@ -158,7 +163,7 @@ function drawIt() {
 
     if (rightDown) {
       if ((paddlex + paddlew) < WIDTH) {
-        upgrades.boots ? paddlex += 10 : paddlex += 5;
+        paddlex += 5 + (upgrades.boots * 3);
         moving = true;
         wasLeftDown = false;
       } else {
@@ -169,7 +174,7 @@ function drawIt() {
       wasLeftDown = true;
       moving = true;
       if (paddlex > 0) {
-        upgrades.boots ? paddlex -= 10 : paddlex -= 5;
+        paddlex -= 5 + (upgrades.boots * 3);
       } else {
         paddlex = 0;
       }
@@ -241,7 +246,7 @@ function drawIt() {
 
     // Effekti - dodajanje delcev in posodabljanje njihovega stanja
 
-    
+
 
     particles = particles.filter(p => {
       p.x += p.vx;
@@ -322,18 +327,28 @@ function drawIt() {
         }
         if (!allDestroyed) break;
       }
-      // Replace allDestroyed check with:
-      if (allDestroyed && !boss.active && !bossSpawned) {
-        bossSpawned = true;
-        initBoss(WIDTH);
+
+
+
+      if (level === 1) {
+        updateBoss(ctx, WIDTH, HEIGHT, paddlex, paddlew, paddleh, bobOffset, ball, ballActive);
+        if (checkBossHit(x, y, r)) {
+          dy = -dy;
+        }
+      } else if (level === 2) {
+        updateBlackbeard(ctx, WIDTH, HEIGHT, paddlex, paddlew, paddleh, bobOffset, ball);
+        if (checkBlackbeardHit(x, y, r)) {
+          dy = -dy;
+        }
       }
 
-      // Add boss update after drawing bricks:
-      updateBoss(ctx, WIDTH, HEIGHT, paddlex, paddlew, paddleh, bobOffset,ball,ballActive);
-
-      // In ball movement, check boss hit before brick hit:
-      if (checkBossHit(x, y, r)) {
-        dy = -dy;
+      if (allDestroyed && !bossSpawned) {
+        bossSpawned = true;
+        if (level === 1) {
+          initBoss(WIDTH);
+        } else if (level === 2) {
+          initBlackbeard(WIDTH);
+        }
       }
     }
   }
@@ -379,11 +394,49 @@ function drawIt() {
 
   initbricks();
 
+  function initLevel2() {
+    var blackShip = new Image();
+    blackShip.src = "img/blackSailShip.png";
+    var blackShipGolden = new Image();
+    blackShipGolden.src = "img/goldenShip.png"; // reuse golden ship
+
+    // Override ships array for level 2
+    ships[1] = blackShip;
+
+    NROWS = 5; //5
+    NCOLS = 10; //10
+    BRICKWIDTH = (WIDTH / NCOLS) - 1;
+    BRICKHEIGHT = 80;
+    PADDING = 1;
+
+    bricks = new Array(NROWS);
+    flips = new Array(NROWS);
+    bobOffsets = new Array(NROWS);
+    shipHP = new Array(NROWS);
+
+    for (i = 0; i < NROWS; i++) {
+      bricks[i] = new Array(NCOLS);
+      flips[i] = new Array(NCOLS);
+      bobOffsets[i] = new Array(NCOLS);
+      shipHP[i] = new Array(NCOLS);
+      for (j = 0; j < NCOLS; j++) {
+        bricks[i][j] = Math.random() * 2 > 0.3 ? 1 : 0;
+        flips[i][j] = Math.random() > 0.5;
+        bobOffsets[i][j] = Math.random() * Math.PI * 2;
+        // Black sail ships take 2 hits, golden still 3
+        shipHP[i][j] = bricks[i][j] === 0 ? 3 : 2;
+      }
+    }
+  }
 
 }
 
+
+
 function gameOver() {
   gameActive = false;
+  const timeSecs = Math.floor((Date.now() - gameStartTime) / 1000);
+  saveScore(coins, timeSecs, false);
   AudioManager.stopBackgroundMusic();
   AudioManager.playSoundEffect('gameOver');
   Swal.fire({
@@ -397,13 +450,40 @@ function gameOver() {
 }
 
 function winGame() {
+  if (level === 1) {
+    boss.active = false;
+    allDestroyed = false;
+    boss.projectiles = [];
+    gameActive = true;
+
+    Swal.fire({
+      title: 'The Fleet Approaches!',
+      html: 'Ye defeated Redbeard!<br>But Blackbeard\'s crew has arrived...<br><strong>Black sails on the horizon!</strong>',
+      confirmButtonText: 'Fight On!',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+    }).then(() => {
+      startLevel2 = true;
+      level = 2;          // ← moved here
+      bossSpawned = false; // ← moved here
+      bossDefeated = false;
+      startLevel2 = true;
+    });
+    return;
+  }
+
+  // Level 2 win — true victory
   gameActive = false;
   AudioManager.stopBackgroundMusic();
   AudioManager.playSoundEffect('victory');
   const timeSecs = Math.floor((Date.now() - gameStartTime) / 1000);
+
+  // Save to leaderboard
+saveScore(coins, timeSecs, true);
+
   Swal.fire({
-    title: 'Victory!',
-    html: 'Ye destroyed all the ships!<br><strong>Doubloons: ' + coins + '</strong><br><strong>Time: ' + timeSecs + 's</strong>',
+    title: 'Victory! Blackbeard is Defeated!',
+    html: 'Scallywag has his revenge!<br><strong>Doubloons: ' + coins + '</strong><br><strong>Time: ' + timeSecs + 's</strong>',
     icon: 'success',
     confirmButtonText: 'Play Again'
   }).then(() => {
@@ -422,9 +502,7 @@ function attack(e) {
     if (!ballActive) {
       ballActive = true;
       dx = 0;
-      if (upgrades.cannons) {
-        dy = -16;
-      } else dy = -8;
+      dy = -(8 + (upgrades.cannons * 4));
       AudioManager.playSoundEffect('cannonFire');
     }
   }
@@ -433,7 +511,10 @@ function attack(e) {
 document.addEventListener("keydown", attack);
 
 function createExplosion(x, y, count = 15) {
-      for (let i = 0; i < count; i++) {
-        particles.push(new Particle(x, y, 'explosion'));
-      }
-    }
+  for (let i = 0; i < count; i++) {
+    particles.push(new Particle(x, y, 'explosion'));
+  }
+}
+
+
+

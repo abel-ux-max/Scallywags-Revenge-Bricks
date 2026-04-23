@@ -65,3 +65,49 @@
 .swal2-icon.swal2-success [class*='swal2-success-line'] {
     background-color: #FFD700 !important;
 }
+
+/* Leaderboard table inside SweetAlert */
+.swal2-popup table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #2c1810;
+}
+
+.swal2-popup table th {
+  background: #2c1810;
+  color: gold;
+  padding: 8px;
+  border: 1px solid gold;
+}
+
+.swal2-popup table td {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  text-align: center;
+}
+
+.swal2-popup table tr:nth-child(even) {
+  background: #f5e6c8;
+}
+
+.swal2-popup table tr:nth-child(odd) {
+  background: #fff;
+}
+
+.swal2-popup table tr:first-child td {
+  font-weight: bold;
+  color: goldenrod;
+}
+
+.swal2-popup {
+    overflow: hidden !important;
+}
+
+.swal2-html-container {
+    overflow: hidden !important;
+}
+
+.swal2-popup {
+    overflow: hidden !important;
+    max-height: 90vh;
+}

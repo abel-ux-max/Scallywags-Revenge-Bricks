@@ -185,3 +185,27 @@ button:active {
         -1px 1px 0px rgba(255, 165, 0, 0.6);
 }
 
+
+#leaderboard_toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #8B4513;
+    border: 2px solid #8B4513;
+    padding: 10px 15px;
+    font-size: 1.2em;
+    font-family: "Pixelify Sans", sans-serif;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 11;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+}
+
+#leaderboard_toggle:hover {
+    background: linear-gradient(135deg, #FFA500, #FF8C00);
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(255, 165, 0, 0.5);
+}

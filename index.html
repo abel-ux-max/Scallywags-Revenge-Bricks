@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<title>Scallywag's Revenge</title>
-<link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/alert.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Scallywag's Revenge</title>
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/alert.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
+
 <body onload="startScreen()">
   <div id="doubloon_score">Doubloons: 0</div>
   <h1 id="title">Scallywag's Revenge</h1>
@@ -15,23 +17,34 @@
 
   <div id="bilge_rat_store">
     <h2>Bilge Rat's Store</h2>
-    <p><strong>Welcome</strong>to the Bilge Rat's Store! Spend your hard-earned doubloons on upgrades and items to aid you in your quest for revenge!</p>
-     <div>
-        <ul>
-          <li><strong>Better Cannons</strong> - 15 Doubloons: Increases your attack speed. <button onclick="purchase('cannons', 15)">Buy</button></li>
-          <li><strong>Speed Boots</strong> - 20 Doubloons: Increases your movement speed. <button onclick="purchase('boots', 20)">Buy</button></li>
-        </ul>
+    <p><strong>Welcome</strong>to the Bilge Rat's Store! Spend your hard-earned doubloons on upgrades and items to aid
+      you in your quest for revenge!</p>
+    <div>
+      <ul>
+        <li>
+          <strong>Cannons</strong> - Upgrade your firepower.
+          <span id="price_cannons">10 Doubloons</span>
+          <button id="btn_cannons" onclick="purchase('cannons')">Buy</button>
+        </li>
+        <li>
+          <strong>Speed Boots</strong> - Upgrade your movement.
+          <span id="price_boots">10 Doubloons</span>
+          <button id="btn_boots" onclick="purchase('boots')">Buy</button>
+        </li>
+      </ul>
     </div>
 
-    
+
   </div>
   <div id="main">
     <canvas id="canvas" width="1500" height="800"></canvas>
-  </div> 
-  <div id="music"> 
-    <span>&#x266B;</span>
-    <span id = "song_title"></span>
   </div>
+  <div id="music">
+    <span>&#x266B;</span>
+    <span id="song_title"></span>
+  </div>
+
+  <button id="leaderboard_toggle" onclick="showLeaderboard()">Leaderboard</button>
 </body>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -44,6 +57,3 @@
 <script src="js/game.js"></script>
 
 </html>
-
-
-
