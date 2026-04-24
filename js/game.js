@@ -464,8 +464,8 @@ function winGame() {
       allowEscapeKey: false,
     }).then(() => {
       startLevel2 = true;
-      level = 2;          // ← moved here
-      bossSpawned = false; // ← moved here
+      level = 2; 
+      bossSpawned = false;
       bossDefeated = false;
       startLevel2 = true;
     });
