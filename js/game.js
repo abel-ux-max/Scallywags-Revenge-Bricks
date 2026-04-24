@@ -483,7 +483,7 @@ saveScore(coins, timeSecs, true);
 
   Swal.fire({
     title: 'Victory! Blackbeard is Defeated!',
-    html: 'Scallywag has his revenge!<br><strong>Doubloons: ' + coins + '</strong><br><strong>Time: ' + timeSecs + 's</strong>',
+    html: 'Scallywag has his revenge!<br><strong>Doubloons: ' + coins + '</strong><br><strong>Time: ' + timeSecs + 's</strong> <br> <strong> Made by Abel Elersič </strong>',
     icon: 'success',
     confirmButtonText: 'Play Again'
   }).then(() => {
